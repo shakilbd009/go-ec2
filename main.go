@@ -22,7 +22,7 @@ const (
 	envk    string = "Environment"
 	envv    string = "Non-Prod"
 	insT    string = "InstanceType"
-	ami     string = "amzn2-ami-hvm-2.0.*"
+	amiS    string = "amzn2-ami-hvm-2.0.*"
 )
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 func createSG(sgn, vpch string, cfg aws.Config, ch chan *ec2.CreateSecurityGroupResponse) {
 
 	input := &ec2.CreateSecurityGroupInput{
-		Description: aws.String(),
+		Description: aws.String(sgDesc),
 		GroupName:   aws.String(sgn),
 		VpcId:       aws.String(vpch),
 	}
@@ -127,12 +127,12 @@ func createEC2(cfg aws.Config, sub string, imageID, key, sgID string, ch chan *e
 	Ec2 := ec2.New(cfg)
 	input := &ec2.RunInstancesInput{
 		ImageId:          aws.String(imageID),
-		InstanceType:     ec2.InstanceTypeT2Micro,
 		KeyName:          aws.String(key),
-		SecurityGroupIds: []string{sgID},
 		SubnetId:         aws.String(sub),
 		MaxCount:         aws.Int64(1),
 		MinCount:         aws.Int64(1),
+		InstanceType:     ec2.InstanceTypeT2Micro,
+		SecurityGroupIds: []string{sgID},
 		TagSpecifications: []ec2.TagSpecification{
 			{
 				ResourceType: ec2.ResourceTypeInstance,
@@ -141,7 +141,7 @@ func createEC2(cfg aws.Config, sub string, imageID, key, sgID string, ch chan *e
 						Value: aws.String(envv),
 					},
 					{Key: aws.String(insT),
-						Value: aws.String(ec2.InstanceTypeT2Micro),
+						Value: aws.String(string(ec2.InstanceTypeT2Micro)),
 					},
 				},
 			},
@@ -172,7 +172,7 @@ func getAMI(cfg aws.Config, ch chan string) {
 		Filters: []ec2.Filter{
 			{
 				Name:   aws.String("name"),
-				Values: []string{ami},
+				Values: []string{amiS},
 			},
 		},
 	}
